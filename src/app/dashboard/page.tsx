@@ -13,10 +13,12 @@ export default function DashboardPage() {
   const [contributions, setContributions] = useState<any>(null);
   const [savedTrends, setSavedTrends] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
       redirect('/sign-in');
+      setSavedTrends([]);
     }
 
     if (isSignedIn) {
