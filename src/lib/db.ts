@@ -1,5 +1,5 @@
 import { supabase, supabaseAdmin } from './supabase';
-import { Trend, Thought, Comment, User, UserEngagement } from './types';
+import { Trend, User } from './types';
 
 // Trend operations
 export async function saveTrends(trends: any[]) {

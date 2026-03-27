@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Badge, TrendingUp, MessageCircle } from 'lucide-react';
+import { TrendingUp, MessageCircle } from 'lucide-react';
 import { Trend } from '@/lib/types';
 
 interface TrendCardProps {

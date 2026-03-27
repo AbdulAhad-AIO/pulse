@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { UserButton, useUser } from '@clerk/nextjs';
 import { Menu, X } from 'lucide-react';
 
 export default function Navbar() {
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn } = useUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -48,7 +48,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             {isSignedIn ? (
               <UserButton
-                afterSignOutUrl="/"
+
                 appearance={{
                   elements: {
                     avatarBox: 'w-9 h-9',
