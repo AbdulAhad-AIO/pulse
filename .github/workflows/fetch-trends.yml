@@ -1,0 +1,18 @@
+name: Fetch Trends Every 2 Hours
+
+on:
+  schedule:
+    - cron: "0 */2 * * *"  # Every 2 hours
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  fetch-trends:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Fetch Trends API
+        run: |
+          curl -X POST https://pulsed-delta.vercel.app/api/cron/fetch-trends \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
