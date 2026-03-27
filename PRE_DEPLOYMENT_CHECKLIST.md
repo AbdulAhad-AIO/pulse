@@ -78,18 +78,38 @@ Complete this checklist before deploying to Vercel. **Estimated time: 20-30 minu
 - [ ] Test homepage loads: `https://your-domain.vercel.app`
 - [ ] Test sign-up flow (you should see Clerk UI)
 
-## Phase 4: Cron Job Setup (Optional - Requires Vercel Pro)
+## Phase 4: Cron Job Setup 
 
-If using **Vercel Pro**:
+### ✅ If using Vercel Hobby (Free Tier) - Recommended Solution:
+
+**GitHub Actions Setup** (completely free, better than EasyCron):
+- [ ] Update `.github/workflows/fetch-trends.yml` - replace `your-domain` with your actual Vercel domain
+- [ ] Go to your GitHub repo > Settings > Secrets and variables > Actions
+- [ ] Create new secret:
+  - Name: `CRON_SECRET`
+  - Value: [same value you used in Vercel env vars]
+- [ ] Commit and push `.github/workflows/fetch-trends.yml` to main branch
+- [ ] Go to Actions tab > see "Fetch Trends Every 2 Hours" workflow
+- [ ] Status should show as scheduled
+- [ ] Verify by clicking the workflow - should show next scheduled run times
+
+**How it works:**
+- Trends fetch: Every 2 hours (GitHub Actions)
+- Insights generate: Daily 1 AM via Vercel cron
+- Badges calculate: Daily 2 AM via Vercel cron
+
+### OR If upgrading to Vercel Pro (Optional):
 - [ ] Go to Project Settings > Cron Jobs
 - [ ] Verify `vercel.json` cron jobs appear:
   - Fetch Trends: `0 */2 * * *` (every 2 hours)
   - Generate Insights: `0 1 * * *` (daily 1 AM)
   - Calculate Badges: `0 2 * * *` (daily 2 AM)
+- [ ] Note: Keep GitHub Actions workflow disabled or remove it to avoid conflicts
 
-If using **Free Tier**:
-- [ ] Set up external cron service (EasyCron.com is free)
-- [ ] Create 3 tasks pointing to your cron endpoints with Bearer token
+### OR Use External Service (Free but Limited):
+- [ ] Go to EasyCron.com
+- [ ] Create 3 free cron tasks pointing to your API endpoints with Bearer token
+- [ ] Disable GitHub Actions workflow if using this method
 
 ## Phase 5: Initial Data Population (2 min)
 
