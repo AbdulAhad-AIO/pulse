@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/fetch-trends",
+      "schedule": "0 */2 * * *"
+    },
+    {
+      "path": "/api/cron/generate-insights",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/calculate-badges",
+      "schedule": "0 2 * * *"
+    }
+  ]
+}
