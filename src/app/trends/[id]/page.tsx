@@ -81,6 +81,7 @@ export default function TrendDetailPage() {
           <Link href="/explore" className="text-blue-600 hover:text-blue-700 mt-4 inline-block">
             Back to Explore
           </Link>
+          {user && <p>Welcome, {user.firstName}</p>}
         </div>
       </div>
     );
