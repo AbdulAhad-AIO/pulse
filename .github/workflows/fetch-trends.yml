@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Call Fetch Trends API
         run: |
-          curl -X GET https://pulse-afh2-nggeakjo3-abdulahads-projects-89cfb252.vercel.app/api/cron/fetch-trends \
+          curl -X GET https://pulse-afh2.vercel.app/api/cron/fetch-trends \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json"
         env:
