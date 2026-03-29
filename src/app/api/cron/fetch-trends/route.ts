@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     const { error } = await supabaseAdmin
       .from('trends')
       .upsert(
-        trends.map(t => ({
+        trends.map((t: any) => ({
           title: t.title,
           description: t.description,
           category: t.category,
