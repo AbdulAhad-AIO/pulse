@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 export async function GET() {
   try {
     // Check if trends table exists
-    const { data: tableData, error: tableError } = await supabaseAdmin
+    const { error: tableError } = await supabaseAdmin
       .from('trends')
       .select('*', { count: 'exact', head: true });
 
