@@ -193,18 +193,50 @@ function determinCategory(text: string): 'health' | 'tech' | 'business' | 'home'
 export async function fetchAllTrends() {
   console.log('📡 Starting trend fetch from multiple sources...');
   
-  // Fetch from all sources in parallel for speed
-  const [hackerNewsTrends, devToTrends, redditTrends, newsTrends] = await Promise.all([
-    fetchHackerNewsTrends(),
-    fetchDevToTrends(),
-    fetchRedditTrends(),
-    fetchNewsTrends(),
-  ]);
+  try {
+    // Try HackerNews first (most reliable)
+    const hackerNewsTrends = await fetchHackerNewsTrends();
+    if (hackerNewsTrends.length > 0) {
+      console.log(`✅ SUCCESS: Using ${hackerNewsTrends.length} HackerNews trends`);
+      return hackerNewsTrends;
+    }
+  } catch (err) {
+    console.error('⚠️ HackerNews failed, trying next source');
+  }
 
-  // Combine all trends
-  const allTrends = [...hackerNewsTrends, ...devToTrends, ...redditTrends, ...newsTrends];
-  
-  console.log(`✅ Total trends fetched: ${allTrends.length}`);
-  
-  return allTrends;
+  try {
+    // Fallback to Dev.to
+    const devToTrends = await fetchDevToTrends();
+    if (devToTrends.length > 0) {
+      console.log(`✅ SUCCESS: Using ${devToTrends.length} Dev.to trends`);
+      return devToTrends;
+    }
+  } catch (err) {
+    console.error('⚠️ Dev.to failed, trying next source');
+  }
+
+  try {
+    // Fallback to Reddit
+    const redditTrends = await fetchRedditTrends();
+    if (redditTrends.length > 0) {
+      console.log(`✅ SUCCESS: Using ${redditTrends.length} Reddit trends`);
+      return redditTrends;
+    }
+  } catch (err) {
+    console.error('⚠️ Reddit failed, trying next source');
+  }
+
+  try {
+    // Last resort: NewsAPI
+    const newsTrends = await fetchNewsTrends();
+    if (newsTrends.length > 0) {
+      console.log(`✅ SUCCESS: Using ${newsTrends.length} NewsAPI trends`);
+      return newsTrends;
+    }
+  } catch (err) {
+    console.error('⚠️ NewsAPI failed too');
+  }
+
+  console.log('❌ No trends fetched from any source');
+  return [];
 }
