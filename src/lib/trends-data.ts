@@ -1,98 +1,63 @@
 import axios from 'axios';
 
-// Google Trends - Using unofficial API
-export async function fetchGoogleTrends() {
-  try {
-    // Using google-trends-api or similar alternative
-    // For MVP, we'll use a placeholder structure
-    const response = await axios.get(
-      'https://trends.google.com/trends/api/dailytrends?hl=en-US&geo=US&ns=15&tz=300'
-    );
-    
-    const data = JSON.parse(response.data.slice(6)); // Remove )]}' prefix
-    return data.default.trends.map((trend: any) => ({
-      title: trend.title.query,
-      description: trend.title.exploringQueries?.[0]?.query || trend.title.query,
-      category: 'tech', // Would need better categorization
-      source: 'google_trends' as const,
-      trending_score: trend.traffic,
-    }));
-  } catch (error) {
-    console.error('Error fetching Google Trends:', error);
-    return [];
-  }
-}
-
-// Reddit - Fetch trending from popular subreddits
-export async function fetchRedditTrends() {
-  try {
-    const subreddits = ['r/worldnews', 'r/technology', 'r/news', 'r/business'];
-    const trends = [];
-
-    for (const subreddit of subreddits) {
-      const response = await axios.get(`https://www.reddit.com/${subreddit}/hot.json?limit=5`, {
-        headers: {
-          'User-Agent': 'ThePulse/1.0',
-        },
-      });
-
-      const posts = response.data.data.children;
-      trends.push(
-        ...posts.map((item: any) => ({
-          title: item.data.title,
-          description: item.data.selftext || item.data.url,
-          category: subreddit.includes('tech') ? 'tech' : 'business',
-          source: 'reddit' as const,
-          trending_score: item.data.upvotes,
-          url: `https://reddit.com${item.data.permalink}`,
-        }))
-      );
-    }
-
-    return trends;
-  } catch (error) {
-    console.error('Error fetching Reddit trends:', error);
-    return [];
-  }
-}
-
-// News API - Fetch trending news
+// News API - Fetch trending news (MAIN SOURCE)
 export async function fetchNewsTrends() {
   try {
+    console.log('🔍 Fetching from NewsAPI...');
+    
+    if (!process.env.NEWS_API_KEY) {
+      console.error('❌ NEWS_API_KEY is not set!');
+      return [];
+    }
+
     const response = await axios.get('https://newsapi.org/v2/top-headlines', {
       params: {
         country: 'us',
-        sortBy: 'publishedAt',
         apiKey: process.env.NEWS_API_KEY,
       },
+      timeout: 10000,
     });
 
+    console.log(`✅ Got ${response.data.articles.length} articles from NewsAPI`);
+
     return response.data.articles.map((article: any) => ({
-      title: article.title,
-      description: article.description,
-      category: determinCategory(article.description),
+      title: article.title || 'Untitled',
+      description: article.description || article.content || 'No description',
+      category: determinCategory(article.title + ' ' + article.description),
       source: 'news' as const,
-      trending_score: 50, // Default score
-      image_url: article.urlToImage,
+      trending_score: 50,
+      image_url: article.urlToImage || null,
       url: article.url,
-    }));
-  } catch (error) {
-    console.error('Error fetching news trends:', error);
+    })).filter((t: any) => t.title && t.description); // Filter out invalid entries
+  } catch (error: any) {
+    console.error('❌ Error fetching NewsAPI:', error.message || error);
     return [];
   }
+}
+
+// Google Trends - OPTIONAL (may fail due to API restrictions)
+export async function fetchGoogleTrends() {
+  return []; // Skip for MVP - focus on NewsAPI only
+}
+
+// Reddit - OPTIONAL (may fail due to rate limiting)
+export async function fetchRedditTrends() {
+  return []; // Skip for MVP - focus on NewsAPI only
 }
 
 // Helper function to categorize content
 function determinCategory(text: string): 'health' | 'tech' | 'business' | 'home' | 'career' {
+  if (!text) return 'business';
+  
   const lowerText = text.toLowerCase();
 
-  if (lowerText.includes('health') || lowerText.includes('medical') || lowerText.includes('disease')) {
+  if (lowerText.includes('health') || lowerText.includes('medical') || lowerText.includes('disease') || lowerText.includes('covid')) {
     return 'health';
   }
-  if (lowerText.includes('tech') || lowerText.includes('ai') || lowerText.includes('software')) {
+  if (lowerText.includes('tech') || lowerText.includes('ai') || lowerText.includes('software') || lowerText.includes('apple') || lowerText.includes('google')) {
     return 'tech';
   }
-  if (lowerText.includes('market') || lowerText.includes('business') || lowerText.includes('economy')) {
+  if (lowerText.includes('market') || lowerText.includes('business') || lowerText.includes('economy') || lowerText.includes('stock') || lowerText.includes('economy')) {
     return 'business';
   }
   if (lowerText.includes('home') || lowerText.includes('real estate') || lowerText.includes('housing')) {
@@ -106,11 +71,12 @@ function determinCategory(text: string): 'health' | 'tech' | 'business' | 'home'
 }
 
 export async function fetchAllTrends() {
-  const [googleTrends, redditTrends, newsTrends] = await Promise.all([
-    fetchGoogleTrends(),
-    fetchRedditTrends(),
-    fetchNewsTrends(),
-  ]);
-
-  return [...googleTrends, ...redditTrends, ...newsTrends];
+  console.log('📡 Starting trend fetch...');
+  
+  // Just use NewsAPI for MVP
+  const newsTrends = await fetchNewsTrends();
+  
+  console.log(`✅ Total trends fetched: ${newsTrends.length}`);
+  
+  return newsTrends;
 }
